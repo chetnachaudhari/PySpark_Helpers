@@ -54,3 +54,17 @@ def debug_dataframe(input_df, name):
     print('Time: {}, Name: {}, Count: {}, Distinct Count: {}, '
           'Execution Time: {}, Number Of Columns: {}'.format(
         datetime.datetime.now(), name, count, distinct_count, execution_time, number_of_columns))
+
+
+def is_null_or_empty(obj):
+    if obj is None:
+        return True
+    elif type(obj) is str and str(obj).strip().__eq__(''):
+        return True
+    else:
+        return False
+
+
+def not_none(elem):
+    """Check if an element is not None."""
+    return elem is not None
