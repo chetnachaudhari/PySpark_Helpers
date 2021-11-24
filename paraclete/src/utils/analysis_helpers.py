@@ -1,6 +1,7 @@
 import re
 import timeit, datetime
 
+from pyspark.sql import functions as F
 from pyspark.sql.functions import col, count, when, concat_ws, collect_list, isnan, explode_outer, avg, sum
 from pyspark.sql.types import StructType, ArrayType
 
@@ -122,7 +123,7 @@ def avg_col(df, col):
 def suffix_columns(df, suffix, sep='_', exclude=None):
     if exclude is None:
         exclude = []
-    suffixed = [col(c).alias(c + sep + suffix) if c not in exclude else c for c in df.columns]
+    suffixed = [F.col(c).alias(c + sep + suffix) if c not in exclude else c for c in df.columns]
     return df.select(suffixed)
 
 
@@ -133,6 +134,13 @@ def select_columns_regex(df, regex):
 def prefix_columns(df, prefix, sep='_', exclude=None):
     if exclude is None:
         exclude = []
-    prefixed = [col(c).alias(prefix + sep + c) if c not in exclude else c for c in df.columns]
+    prefixed = [F.col(c).alias(prefix + sep + c) if c not in exclude else c for c in df.columns]
     return df.select(prefixed)
+
+
+def is_unique(col_name):
+    return (
+            (F.count(col_name) == F.countDistinct(col_name)) &
+            (F.count(F.when(F.col(col_name).isNull(), 1).otherwise(None)) <= 1)
+    ).alias(col_name)
 
