@@ -144,3 +144,6 @@ def is_unique(col_name):
             (F.count(F.when(F.col(col_name).isNull(), 1).otherwise(None)) <= 1)
     ).alias(col_name)
 
+
+def contains_pattern(col_name, pattern):
+    return (F.regexp_extract(F.col(col_name), pattern, 0) != '').alias(col_name)
