@@ -2,7 +2,8 @@ import re
 import timeit, datetime
 
 from pyspark.sql import functions as F
-from pyspark.sql.functions import col, count, when, concat_ws, collect_list, isnan, explode_outer, avg, sum
+from pyspark.sql.functions import col, count, when, concat_ws, collect_list, isnan, explode_outer, avg, sum, \
+    regexp_replace
 from pyspark.sql.types import StructType, ArrayType
 
 
@@ -154,3 +155,7 @@ def show_df_partitioning_stats(df):
     rows_per_partition_df.summary().show()
 
 
+def remove_spaces(df, columns):
+  for column in columns:
+    df = df.withColumn(column, regexp_replace(col(column), ' ', ''))
+  return df
