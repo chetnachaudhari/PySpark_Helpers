@@ -1,3 +1,4 @@
+import re
 import timeit, datetime
 
 from pyspark.sql.functions import col, count, when, concat_ws, collect_list, isnan, explode_outer, avg, sum
@@ -123,4 +124,15 @@ def suffix_columns(df, suffix, sep='_', exclude=None):
         exclude = []
     suffixed = [col(c).alias(c + sep + suffix) if c not in exclude else c for c in df.columns]
     return df.select(suffixed)
+
+
+def select_columns_regex(df, regex):
+    return df.select([c for c in df.columns if re.search(regex, c)])
+
+
+def prefix_columns(df, prefix, sep='_', exclude=None):
+    if exclude is None:
+        exclude = []
+    prefixed = [col(c).alias(prefix + sep + c) if c not in exclude else c for c in df.columns]
+    return df.select(prefixed)
 
