@@ -1,6 +1,6 @@
 import timeit, datetime
 
-from pyspark.sql.functions import col, count, when, concat_ws, collect_list
+from pyspark.sql.functions import col, count, when, concat_ws, collect_list, isnan
 
 
 def get_list_from_df(input_df):
@@ -78,3 +78,10 @@ def transpose_dataframe(df, columns, pivotCol):
     final_df = df_1.groupBy(col("col0")).pivot(pivotCol).agg(concat_ws("", collect_list(col("col1"))))\
                  .withColumnRenamed("col0", pivotCol)
     return final_df
+
+
+def get_completeness(df):
+    output_df = df.select([count(when(isnan(c) | col(c).isNull(), c)).alias(c) for c in df.columns])
+    return output_df
+
+
