@@ -147,3 +147,10 @@ def is_unique(col_name):
 
 def contains_pattern(col_name, pattern):
     return (F.regexp_extract(F.col(col_name), pattern, 0) != '').alias(col_name)
+
+
+def show_df_partitioning_stats(df):
+    rows_per_partition_df = df.select(F.spark_partition_id().alias("pid")).groupBy('pid').count()
+    rows_per_partition_df.summary().show()
+
+
