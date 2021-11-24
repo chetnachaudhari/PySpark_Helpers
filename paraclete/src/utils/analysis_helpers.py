@@ -1,6 +1,6 @@
 import timeit, datetime
 
-from pyspark.sql.functions import col, count, when, concat_ws, collect_list, isnan, explode_outer
+from pyspark.sql.functions import col, count, when, concat_ws, collect_list, isnan, explode_outer, avg, sum
 from pyspark.sql.types import StructType, ArrayType
 
 
@@ -108,3 +108,19 @@ def flatten(df):
                                for field in df.schema.fields
                                if type(field.dataType) == ArrayType or type(field.dataType) == StructType])
     return df
+
+
+def sum_col(df, col):
+    return df.select(sum(col)).collect()[0][0]
+
+
+def avg_col(df, col):
+    return df.select(avg(col)).collect()[0][0]
+
+
+def suffix_columns(df, suffix, sep='_', exclude=None):
+    if exclude is None:
+        exclude = []
+    suffixed = [col(c).alias(c + sep + suffix) if c not in exclude else c for c in df.columns]
+    return df.select(suffixed)
+
