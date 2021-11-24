@@ -1,6 +1,7 @@
 import timeit, datetime
 
-from pyspark.sql.functions import col, count, when, concat_ws, collect_list, isnan
+from pyspark.sql.functions import col, count, when, concat_ws, collect_list, isnan, explode_outer
+from pyspark.sql.types import StructType, ArrayType
 
 
 def get_list_from_df(input_df):
@@ -85,3 +86,25 @@ def get_completeness(df):
     return output_df
 
 
+def flatten(df):
+    complex_fields = dict([(field.name, field.dataType)
+                           for field in df.schema.fields
+                           if type(field.dataType) == ArrayType or type(field.dataType) == StructType])
+
+    while len(complex_fields) != 0:
+        col_name = list(complex_fields.keys())[0]
+
+        # if StructType then convert all sub element to columns.
+        if (type(complex_fields[col_name]) == StructType):
+            expanded = [col(col_name + '.' + k).alias(col_name + '_' + k) for k in
+                        [n.name for n in complex_fields[col_name]]]
+            df = df.select("*", *expanded).drop(col_name)
+
+        # if ArrayType then add the Array Elements as Rows using the explode function
+        elif (type(complex_fields[col_name]) == ArrayType):
+            df = df.withColumn(col_name, explode_outer(col_name))
+
+        complex_fields = dict([(field.name, field.dataType)
+                               for field in df.schema.fields
+                               if type(field.dataType) == ArrayType or type(field.dataType) == StructType])
+    return df
