@@ -158,6 +158,16 @@ def show_df_partitioning_stats(df):
 
 ## Function to remove spaces from column names
 def remove_spaces(df, columns):
-  for column in columns:
-    df = df.withColumn(column, regexp_replace(col(column), ' ', ''))
-  return df
+    for column in columns:
+        df = df.withColumn(column, regexp_replace(col(column), ' ', ''))
+    return df
+
+
+## Function to print shape of a dataframe
+def print_shape(df, name=None):
+    if name:
+        print("{} shape: ({}, {}, {})".format(name, df.count(), df.distinctCount(), len(df.columns)))
+    else:
+        print("Dataframe shape: ({}, {}, {})".format(df.count(), df.distinctCount(), len(df.columns)))
+
+
