@@ -1,6 +1,6 @@
 import timeit, datetime
 
-from pyspark.sql.functions import col, count, when
+from pyspark.sql.functions import col, count, when, concat_ws, collect_list
 
 
 def get_list_from_df(input_df):
@@ -68,3 +68,13 @@ def is_null_or_empty(obj):
 def not_none(elem):
     """Check if an element is not None."""
     return elem is not None
+
+
+def transpose_dataframe(df, columns, pivotCol):
+    columnsValue = list(map(lambda x: str("'") + str(x) + str("',")  + str(x), columns))
+    stackCols = ','.join(x for x in columnsValue)
+    df_1 = df.selectExpr(pivotCol, "stack(" + str(len(columns)) + "," + stackCols + ")")\
+           .select(pivotCol, "col0", "col1")
+    final_df = df_1.groupBy(col("col0")).pivot(pivotCol).agg(concat_ws("", collect_list(col("col1"))))\
+                 .withColumnRenamed("col0", pivotCol)
+    return final_df
