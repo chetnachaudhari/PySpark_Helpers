@@ -146,6 +146,7 @@ def is_unique(col_name):
     ).alias(col_name)
 
 
+
 def contains_pattern(col_name, pattern):
     return (F.regexp_extract(F.col(col_name), pattern, 0) != '').alias(col_name)
 
@@ -155,6 +156,7 @@ def show_df_partitioning_stats(df):
     rows_per_partition_df.summary().show()
 
 
+## Function to remove spaces from column names
 def remove_spaces(df, columns):
   for column in columns:
     df = df.withColumn(column, regexp_replace(col(column), ' ', ''))
